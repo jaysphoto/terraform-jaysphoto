@@ -1,6 +1,7 @@
 # Defaults
 /.idea
 /terraform-jaysphoto.iml
+imports.tf
 
 # Terraform
 .terraform
