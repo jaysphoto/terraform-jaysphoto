@@ -20,6 +20,15 @@
                 "arn:aws:iam::*:role/OrganizationAccountAccessRole"
             ]
         },
+	{
+            "Effect": "Deny",
+            "Action": [
+		"account:PutAccountName",
+		"organizations:UpdateOrganizationalUnit",
+                "organizations:LeaveOrganization"
+            ],
+            "Resource": "*"
+        },
         {
             "Sid": "RequireMicroInstanceType",
             "Effect": "Deny",
