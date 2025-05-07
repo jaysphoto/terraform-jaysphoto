@@ -10,6 +10,26 @@ locals {
   sandbox_service_control_policy_id = local.aws_organizations_scps_by_name[local.sandbox_service_control_policy_name]
   default_sandbox_project_rcp_id = local.aws_organizations_rcps_by_name[var.sandbox_projects_policy_defaults.resource_control_policy_name]
   default_sandbox_project_scp_id = local.aws_organizations_scps_by_name[var.sandbox_projects_policy_defaults.service_control_policy_name]
+  projects_sandbox_project_policies = {
+    for project_policy in flatten([
+      for index, project in var.sandbox_projects :
+        concat([
+          for name in lookup(var.sandbox_projects_policies[index], "service_control_policy_names", [local.default_sandbox_project_scp_id]) : {
+            project_name = index
+            policy_name = name
+            policy_id = local.aws_organizations_scps_by_name[name]
+            type = "service_control_policy"
+          }],
+          [
+          for name in lookup(var.sandbox_projects_policies[index], "resource_control_policy_names", [local.default_sandbox_project_rcp_id]) : {
+            project_name = index
+            policy_name = name
+            policy_id = local.aws_organizations_rcps_by_name[name]
+            type = "resource_control_policy"
+          }]
+        )
+    ]) : "${project_policy.project_name}_${project_policy.type}_${project_policy.policy_name}" => project_policy
+  }
 }
 
 # Create the sand project organizational unit and attach policies
@@ -28,7 +48,7 @@ resource "aws_organizations_policy_attachment" "projects_sandbox_ou_scp" {
   target_id = aws_organizations_organizational_unit.projects_sandbox.id
 }
 
-# Create the sand project accounts and attach policies
+# Create the sandbox project accounts
 resource "aws_organizations_account" "sandbox_projects" {
   for_each = var.sandbox_projects
 
@@ -52,16 +72,10 @@ resource "aws_organizations_account" "sandbox_projects" {
   }
 }
 
-resource "aws_organizations_policy_attachment" "projects_sandbox_project_rcp" {
-  for_each = var.sandbox_projects
+# Attach project policies to the project AWS accounts
+resource "aws_organizations_policy_attachment" "projects_sandbox_control_policy" {
+  for_each = local.projects_sandbox_project_policies
 
-  policy_id = local.default_sandbox_project_rcp_id
-  target_id = aws_organizations_account.sandbox_projects["${each.key}"].id
-}
-
-resource "aws_organizations_policy_attachment" "projects_sandbox_project_scp" {
-  for_each = var.sandbox_projects
-
-  policy_id = local.default_sandbox_project_scp_id
-  target_id = aws_organizations_account.sandbox_projects["${each.key}"].id
+  policy_id = each.value.policy_id
+  target_id = aws_organizations_account.sandbox_projects["${each.value.project_name}"].id
 }

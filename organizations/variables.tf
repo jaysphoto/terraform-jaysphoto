@@ -32,3 +32,12 @@ variable "sandbox_projects_policies" {
   }))
   default = {}
 }
+
+variable "policy_documents" {
+  description = "A map of policy documents to use for the policies."
+  type = map(object({
+    file_path = string
+    type = string
+  }))
+  default = {}
+}
