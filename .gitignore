@@ -1,12 +1,14 @@
 # Defaults
+.DS_Store
 /.envrc
 /.idea
-/terraform-jaysphoto.iml
-terraform.tfvars
-imports.tf
 
 # Terraform
 .terraform
 .terraform.lock.hcl
+backend_*.auto.tfvars
+imports.tf
 terraform.tfstate
 terraform.tfstate.*
+terraform.tfvars
+/terraform-jaysphoto.iml
