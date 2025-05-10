@@ -1,48 +1,29 @@
 
-# Configure AWS organization structure
-In `terraform.tfvars`:
+
+# Configuration
+To managed the OU structures, a Json file with the desired structure is required
+
+## Organization configurations
+Organizational Unit and Account structure are read from a Json file; Optionally this configuration
+is stored in the Admin Account's S3, by setting:
 
 ```
-sandbox_project_organization_unit = {
-    name = "Project Sandbox"
-    admin_role_name = "SandboxOrganizationAdminRole"
-    service_control_policy_name = "FullAWSAccess"
-    resource_control_policy_name = "RCPFullAWSAccess"
-}
-
-sandbox_projects = {
-  "sandbox_project_1_dev" = {
-    name  = "Sandbox Project 1 Dev"
-    email = "sandbox_project+1_dev@example.com"
-  }
-}
-
-sandbox_projects_policy_defaults = {
-    service_control_policy_name = "FullAWSAccess"
-    resource_control_policy_name = "RCPFullAWSAccess"
-}
-
-# Optional set policies per project
-sandbox_projects_policies = {
-    "sandbox_project_1_dev" = {
-        service_control_policy_names = ["LimitedProjectSCP"]
-    }
-}
-
-policy_documents = {
-  "LimitedProjectSCP" = { file_path = "policies/limited_project_scp.json", type = "SERVICE_CONTROL_POLICY" },
-  "SecureSandboxRCP" = { file_path = "policies/secure_sandbox_rcp.json", type = "RESOURCE_CONTROL_POLICY" }
-}
+export TF_VARS_s3_config_bucket="terraform-jaysphoto-state"
+export TF_VARS_s3_config_sandbox_key="aws/organizations"
 ```
 
-# importing OU-ACCOUNT existing resources
+The Sandbox OU configuration is stored in `s3://terraform-jaysphoto-state/aws/organizations/sandbox/latest.json`, for example.
+
+# Importing resources
+
+## Existing AWS Organizational Unit and/or Accounts
 Examples:
 ```
 terraform import aws_organizations_organizational_unit.projects_sandbox ou-1234-12345678
 terarform import aws_organizations_account.sandbox_projects["name"] 0123456789012
 ```
 
-# importing existing policy attachments for the Sandbox OU and Project(-s)
+## Existing Account policy attachments
 Examples:
 ```
 aws organizations list-policies-for-target --target-id ou-1234-12345678 --filter RESOURCE_CONTROL_POLICY

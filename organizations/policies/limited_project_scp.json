@@ -23,8 +23,8 @@
 	{
             "Effect": "Deny",
             "Action": [
-		"account:PutAccountName",
-		"organizations:UpdateOrganizationalUnit",
+                "account:PutAccountName",
+                "organizations:UpdateOrganizationalUnit",
                 "organizations:LeaveOrganization"
             ],
             "Resource": "*"
