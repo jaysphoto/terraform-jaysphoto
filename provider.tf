@@ -13,6 +13,4 @@ terraform {
   }
 }
 
-provider "aws" {
-  profile = "default"
-}
+provider "aws" { }
