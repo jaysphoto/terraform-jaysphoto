@@ -28,10 +28,8 @@ locals {
     var.custom_scps_by_name,
   )
 
-  sandbox_resource_control_policy_name  = var.organizational_unit.resource_control_policy_name
-  sandbox_resource_control_policy_id    = local.aws_organizations_rcps_by_name[local.sandbox_resource_control_policy_name]
-  sandbox_service_control_policy_name   = var.organizational_unit.service_control_policy_name
-  sandbox_service_control_policy_id     = local.aws_organizations_scps_by_name[local.sandbox_service_control_policy_name]
+  sandbox_resource_control_policy_id    = local.aws_organizations_rcps_by_name[var.organizational_unit.resource_control_policy_name]
+  sandbox_service_control_policy_id     = local.aws_organizations_scps_by_name[var.organizational_unit.service_control_policy_name]
 
   default_ou_account_rcp_id = local.aws_organizations_rcps_by_name[var.ou_account_policy_defaults.resource_control_policy_name]
   default_ou_account_scp_id = local.aws_organizations_scps_by_name[var.ou_account_policy_defaults.service_control_policy_name]

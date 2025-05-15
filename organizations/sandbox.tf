@@ -23,9 +23,9 @@ module "projects_sandbox" {
   ou_account_policy_defaults  = lookup(local.config, "sandbox_projects_policy_defaults", {})
   ou_account_policies         = lookup(local.config, "sandbox_projects_policies", {})
   policy_documents            = local.policy_documents
-  additional_tags             = { Environment = "Sandbox" }
-  custom_rcps_by_name         = { for k, v in aws_organizations_policy.customer_managed : v.name => v.id if v.type == "RESOURCE_CONTROL_POLICY" }
-  custom_scps_by_name         = { for k, v in aws_organizations_policy.customer_managed : v.name => v.id if v.type == "SERVICE_CONTROL_POLICY" }
+  additional_tags             = lookup(local.config, "additional_tags", {})
+  custom_rcps_by_name         = { for k, v in lookup(local.config, "policy_documents", {}) : k => aws_organizations_policy.customer_managed[k].id if v.type == "RESOURCE_CONTROL_POLICY" }
+  custom_scps_by_name         = { for k, v in lookup(local.config, "policy_documents", {}) : k => aws_organizations_policy.customer_managed[k].id if v.type == "SERVICE_CONTROL_POLICY" }
 }
 
 # Store latest sandbox Organizations config
