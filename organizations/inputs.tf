@@ -1,7 +1,6 @@
 variable "organization_config_file" {
   description = "The path to the organization config file."
   type        = string
-  default     = "sandbox_organizations.json"
 }
 
 variable "s3_config_bucket" {

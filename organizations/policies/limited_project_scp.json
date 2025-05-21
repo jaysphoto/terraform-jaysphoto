@@ -2,34 +2,6 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "DenyAccessToAdminRole",
-            "Effect": "Deny",
-            "Action": [
-                "iam:AttachRolePolicy",
-                "iam:DeleteRole",
-                "iam:DeleteRolePermissionsBoundary",
-                "iam:DeleteRolePolicy",
-                "iam:DetachRolePolicy",
-                "iam:PutRolePermissionsBoundary",
-                "iam:PutRolePolicy",
-                "iam:UpdateAssumeRolePolicy",
-                "iam:UpdateRole",
-                "iam:UpdateRoleDescription"
-            ],
-            "Resource": [
-                "arn:aws:iam::*:role/OrganizationAccountAccessRole"
-            ]
-        },
-	{
-            "Effect": "Deny",
-            "Action": [
-                "account:PutAccountName",
-                "organizations:UpdateOrganizationalUnit",
-                "organizations:LeaveOrganization"
-            ],
-            "Resource": "*"
-        },
-        {
             "Sid": "RequireMicroInstanceType",
             "Effect": "Deny",
             "Action": "ec2:RunInstances",
@@ -56,6 +28,15 @@
                     "ec2:VolumeType": "gp3"
                 }
             }
+        },
+        {
+            "Sid": "DenyUsageOfKmsKeys",
+            "Effect": "Deny",
+            "Action": [
+                "kms:CreateKey",
+                "kms:GenerateRandom"
+            ],
+            "Resource": "*"
         }
     ]
 }

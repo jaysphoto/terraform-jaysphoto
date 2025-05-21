@@ -32,14 +32,6 @@ variable "ou_account_policies" {
                 }))
 }
 
-variable "policy_documents" {
-  description = "A map of policy documents to use for the policies."
-  type        = map(object({
-                  file_path = string
-                  type      = string
-                }))
-}
-
 variable "additional_tags" {
   description = "Additional tags to apply to the resources."
   type        = map(string)
@@ -56,4 +48,10 @@ variable "custom_scps_by_name" {
   description = "A map of custom service control policy IDs by name."
   type        = map(string)
   default     = {}
+}
+
+variable "attach_default_ou_policy" {
+  description = "Attach the default policy for OU accounts."
+  type        = bool
+  default     = true
 }

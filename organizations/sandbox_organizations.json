@@ -1,8 +1,8 @@
 {
     "sandbox_organization_unit": {
         "name": "Project Sandbox",
-        "admin_role_name": "SandboxOrganizationAdminRole",
-        "service_control_policy_name": "DefaultProjectSCP",
+        "admin_role_name": "OrganizationAccountAccessRole",
+        "service_control_policy_name": "DefaultOUSCP",
         "resource_control_policy_name": "RCPFullAWSAccess"
     },
     "sandbox_projects": {
@@ -24,5 +24,9 @@
     "policy_documents": {
         "LimitedProjectSCP": { "file_path": "policies/limited_project_scp.json", "type": "SERVICE_CONTROL_POLICY" },
         "SecureSandboxRCP": { "file_path": "policies/secure_sandbox_rcp.json", "type": "RESOURCE_CONTROL_POLICY" }
+    },
+    "additional_tags": {
+        "Environment": "Dev",
+        "Project": "Sandbox"
     }
 }
