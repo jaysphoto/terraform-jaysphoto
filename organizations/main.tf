@@ -18,10 +18,10 @@ resource "aws_organizations_policy" "customer_managed" {
 module "projects_sandbox" {
   source = "../modules/aws_organization"
 
-  organizational_unit         = lookup(local.config, "sandbox_organization_unit", {})
-  ou_accounts                 = lookup(local.config, "sandbox_projects", {})
-  ou_account_policy_defaults  = lookup(local.config, "sandbox_projects_policy_defaults", {})
-  ou_account_policies         = lookup(local.config, "sandbox_projects_policies", {})
+  organizational_unit         = lookup(local.config, "organization_unit", {})
+  ou_accounts                 = lookup(local.config, "projects", {})
+  ou_account_policy_defaults  = lookup(local.config, "projects_policy_defaults", {})
+  ou_account_policies         = lookup(local.config, "projects_policies", {})
   additional_tags             = lookup(local.config, "additional_tags", {})
   custom_rcps_by_name         = { for k, v in lookup(local.config, "policy_documents", {}) : k => aws_organizations_policy.customer_managed[k].id if v.type == "RESOURCE_CONTROL_POLICY" }
   custom_scps_by_name         = { for k, v in lookup(local.config, "policy_documents", {}) : k => aws_organizations_policy.customer_managed[k].id if v.type == "SERVICE_CONTROL_POLICY" }
@@ -32,7 +32,7 @@ resource "aws_s3_object" "sandbox_organizations_latest_config" {
   count         = var.s3_config_bucket == null ? 0 : 1
 
   bucket        = var.s3_config_bucket
-  key           = var.s3_config_sandbox_key
+  key           = var.s3_config_key
   source        = var.organization_config_file
   content_type  = "application/json"
 }

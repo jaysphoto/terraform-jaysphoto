@@ -8,9 +8,10 @@ terraform {
     }
   }
 
-  backend "s3" {
-    encrypt = true
+  backend "s3" { 
+    encrypt        = true
   }
 }
 
-provider "aws" { }
+provider "aws" {
+}

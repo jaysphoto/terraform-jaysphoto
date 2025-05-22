@@ -4,7 +4,7 @@ Configure the [AWS CLI](https://docs.aws.amazon.com/cli/v1/userguide/cli-configu
 
 Set the desired AWS Profile and Region:
 ```
-export AWS_REGION=eu-west-1
+export AWS_REGION=us-west-1
 export AWS_PROFILE=default
 ```
 
@@ -16,17 +16,17 @@ Create an AWS S3 Bucket to hold the terraform state, in the correct region and w
 aws s3 mb s3://terraform-jaysphoto-state --region us-west-1
 ```
 
-Create the backend configuration file `backend_s3.auto.tfvars`:
+Create the backend configuration file `state.config`:
 ```
 bucket = "terraform-jaysphoto-state" 
 key    = "aws/terraform.tfstate"
-region = "eu-west-1"
+region = "us-west-1"
 
 ```
 
 Initialize the new Terraform Backend, in the same region with the S3 bucket that was created:
 ```
-% terraform init -backend-config backend_s3.auto.tfvars
+% terraform init -backend-config="./state.config"
 Initializing the backend...
 Backend configuration changed!
 

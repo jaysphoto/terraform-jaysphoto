@@ -8,7 +8,9 @@
 .terraform.lock.hcl
 backend_*.auto.tfvars
 imports.tf
+state.config
 terraform.tfstate
 terraform.tfstate.*
 terraform.tfvars
 /terraform-jaysphoto.iml
+organizations/*_organizations.json

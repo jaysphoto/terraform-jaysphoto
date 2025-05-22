@@ -1,18 +1,60 @@
 
 
 # Configuration
-To managed the OU structures, a Json file with the desired structure is required
+To create the AWS organizations, a Json file with the desired accounts and their configurations is required.
 
 ## Organization configurations
-Organizational Unit and Account structure are read from a Json file; Optionally this configuration
-is stored in the Admin Account's S3, by setting:
+Organizational Unit and Account structure are read from a Json file, for example `example_organizations.json`:
+
 
 ```
+{
+    "organization_unit": {
+        "name": "Project Sandbox",
+        "admin_role_name": "OrganizationAccountAccessRole",
+        "service_control_policy_name": "FullAWSAccess",
+        "resource_control_policy_name": "RCPFullAWSAccess"
+    },
+    "projects": {
+        "project_1": {
+            "name": "Project 1 Dev",
+            "email": "project+1+dev@organization.com"
+        }
+    },
+    "projects_policy_defaults": {
+        "service_control_policy_name": "FullAWSAccess",
+        "resource_control_policy_name": "RCPFullAWSAccess"
+    },
+    "projects_policies": {
+        "project_1": {
+            "service_control_policy_names": ["FullAWSAccess"],
+            "resource_control_policy_names": ["RCPFullAWSAccess", "SecureSandboxRCP"]
+        }
+    },
+    "policy_documents": {
+        "LimitedProjectSCP": { "file_path": "policies/limited_project_scp.json", "type": "SERVICE_CONTROL_POLICY" },
+        "SecureSandboxRCP": { "file_path": "policies/secure_sandbox_rcp.json", "type": "RESOURCE_CONTROL_POLICY" }
+    },
+    "additional_tags": {
+        "Environment": "Dev",
+        "Project": "Sandbox"
+    }
+}
+```
+
+Optionally this configuration is persisted in an AWS S3 bucket when applied, by setting:
+
+```
+export TF_VARS_organization_config_file="example_organizations.json"
 export TF_VARS_s3_config_bucket="terraform-jaysphoto-state"
 export TF_VARS_s3_config_sandbox_key="aws/organizations"
 ```
+or running `terraform plan` / `terraform apply` with:
+```
+terraform plan -var "organization_config_file=example_organizations.json" -var "s3_config_bucket=terraform-jaysphoto-state" -var "s3_config_sandbox_key=aws/organizations"
+```
 
-The Sandbox OU configuration is stored in `s3://terraform-jaysphoto-state/aws/organizations/sandbox/latest.json`, for example.
+The Sandbox OU configuration will be stored in `s3://terraform-jaysphoto-state/aws/organizations/sandbox/latest.json`, in this example.
 
 # Importing resources
 

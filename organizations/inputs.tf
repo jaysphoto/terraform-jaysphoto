@@ -4,13 +4,13 @@ variable "organization_config_file" {
 }
 
 variable "s3_config_bucket" {
-  description = "The S3 bucket to store the sandbox organization JSON."
+  description = "The S3 bucket to store the AWS organizations configuration."
   type        = string
   default     = null
 }
 
-variable "s3_config_sandbox_key" {
-  description = "The S3 key (path) to store the sandbox organization JSON."
+variable "s3_config_key" {
+  description = "The S3 key (path) to store the AWS organizations JSON file."
   type        = string
   default     = "aws/organizations/sandbox/latest.json"
 }
