@@ -9,6 +9,7 @@ Organizational Unit and Account structure are read from a Json file, for example
 
 ```
 {
+    # AWS Organization structure
     "organization_unit": {
         "name": "Project Sandbox",
         "admin_role_name": "OrganizationAccountAccessRole",
@@ -38,6 +39,41 @@ Organizational Unit and Account structure are read from a Json file, for example
     "additional_tags": {
         "Environment": "Dev",
         "Project": "Sandbox"
+    },
+    # AWS SSO configuration
+    "permission_sets": {
+        "AdministratorAccess":
+            {
+                "description": "Full account access permissions",
+                "managed_policies": [
+                    "arn:aws:iam::aws:policy/AdministratorAccess"
+                ],
+                "inline_policies": []
+            },
+        "PowerUserAccess":
+            {
+                "managed_policies": [
+                    "arn:aws:iam::aws:policy/PowerUserAccess"
+                ],
+                "inline_policies": [],
+                "session_duration": "PT4H"
+            }
+    },
+    "group_permissions": {
+        "Admins": {
+            "permission_sets": ["AdministratorAccess"],
+            "description": "Full access to manage the project and its resources.",
+            "assignments": {
+                "all_accounts": true
+            }
+        },
+        "Boquercom": {
+            "permission_sets": ["PowerUserAccess"],
+            "description": "Access to manage Boquercom resources.",
+            "assignments": {
+                "accounts": ["project_1"]
+            }
+        }
     }
 }
 ```
@@ -77,5 +113,17 @@ aws organizations list-policies-for-target --target-id 0123456789012 --filter RE
 aws organizations list-policies-for-target --target-id 0123456789012 --filter SERVICE_CONTROL_POLICY
 terraform import 'aws_organizations_policy_attachment.projects_sandbox_control_policy["sandbox_project_1_dev_resource_control_policy_RCPFullAWSAccess"]' 0123456789012:p-RCPFullAWSAccess
 terraform import 'aws_organizations_policy_attachment.projects_sandbox_control_policy["sandbox_project_1_dev_service_control_policy_FullAWSAccess"]' 0123456789012:p-FullAWSAccess
+
+```
+
+## Existing IAM Identity Center resources
+Examples:
+
+Listing Permission Sets:
+```
+aws sso-admin list-permission-sets --instance-arn arn:aws:sso:::instance/ssoins-123456789abcdef
+aws sso-admin describe-permission-set --instance-arn arn:aws:sso:::instance/ssoins-123456789abcdef --permission-set-arn arn:aws:sso:::permissionSet/ssoins-123456789abcdef/ps-1111222233334444
+
+terraform import 'aws_ssoadmin_permission_set.permission_set["AdministratorAccess"]' 'arn:aws:sso:::permissionSet/ssoins-123456789abcdef/ps-1111222233334444,arn:aws:sso:::instance/ssoins-123456789abcdef'
 
 ```

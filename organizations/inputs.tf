@@ -14,3 +14,9 @@ variable "s3_config_key" {
   type        = string
   default     = "aws/organizations/sandbox/latest.json"
 }
+
+variable "default_sts_session_duration" {
+  description = "The default STS session duration for the permission sets."
+  type        = string
+  default     = "PT2H" # Default to 2 hours
+}
