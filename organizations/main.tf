@@ -11,7 +11,12 @@ locals {
   group_permissions = lookup(local.config, "group_permissions", {})
   permission_sets_aws_managed = flatten([
     for k, ps in local.permission_sets : [
-      for p in ps.managed_policies : { permission_set: k, policy: p }
+      for p in lookup(ps, "managed_policies", []) : { permission_set: k, policy: p }
+    ]
+  ])
+  permission_sets_customer_managed = flatten([
+    for k, ps in local.permission_sets : [
+      for p in lookup(ps, "custom_policies", []) : { permission_set: k, policy: p }
     ]
   ])
   group_account_assignments = {
@@ -67,12 +72,26 @@ resource "aws_ssoadmin_permission_set" "permission_set" {
   tags             = lookup(each.value, "tags", {})
 }
 
+# AWS Managed policies
 resource "aws_ssoadmin_managed_policy_attachment" "managed_policy" {
   for_each = { for p in local.permission_sets_aws_managed : "${p.permission_set}_${p.policy}" => p }
 
   instance_arn       = local.sso_instance_arn
   permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value.permission_set].arn
   managed_policy_arn = "arn:aws:iam::aws:policy/${each.value.policy}"
+}
+
+# Customer-managed policies
+resource "aws_ssoadmin_customer_managed_policy_attachment" "customer_policy" {
+  for_each = { for p in local.permission_sets_customer_managed : "${p.permission_set}_${p.policy}" => p }
+  depends_on = [aws_s3_bucket_policy.sandbox_organizations_config_bucket_policy]
+
+  instance_arn       = local.sso_instance_arn
+  permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value.permission_set].arn
+  customer_managed_policy_reference {
+    name = each.value.policy
+    path = "/"
+  }
 }
 
 # AWS IAM Identity Store Groups
@@ -110,4 +129,74 @@ resource "aws_s3_object" "sandbox_organizations_latest_config" {
   key          = var.s3_config_key
   source       = var.organization_config_file
   content_type = "application/json"
+}
+
+# Allow AWS Organizations accounts to access config bucket
+resource "aws_s3_bucket_policy" "sandbox_organizations_config_bucket_policy" {
+  count = var.s3_config_bucket == null ? 0 : 1
+
+  bucket = var.s3_config_bucket
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowOrganizationUnitsReadConfigBucket"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = ["s3:GetObject", "s3:ListBucket"]
+        Resource  = [
+          "arn:aws:s3:::${var.s3_config_bucket}",
+          "arn:aws:s3:::${var.s3_config_bucket}/${dirname(var.s3_config_key)}",
+          "arn:aws:s3:::${var.s3_config_bucket}/${var.s3_config_key}"
+        ],
+        Condition = {
+          StringEquals = {
+            "aws:PrincipalOrgID" = data.aws_organizations_organization.org.id
+          }
+        }
+      },
+      {
+        Sid = "AllowOrganzationUnitsWriteConfigBucketTerraformEnvState"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = ["s3:GetObject", "s3:PutObject"]
+        Resource = [
+          "arn:aws:s3:::${var.s3_config_bucket}/env:/*"
+        ]
+        Condition = {
+          StringEquals = {
+            "aws:PrincipalOrgID" = data.aws_organizations_organization.org.id
+          }
+        }
+      }
+    ]
+  })
+}
+
+# Allow SSO user to access the config bucket
+resource "aws_iam_policy" "ssouser_config_bucket_policy" {
+  count = var.s3_config_bucket == null ? 0 : 1
+
+  name        = "SSOUserConfigBucketAccess"
+  description = "Allows SSO users to access the Organizations config bucket"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:PutObject"
+        ],
+        Resource = [
+          "arn:aws:s3:::${var.s3_config_bucket}",
+          "arn:aws:s3:::${var.s3_config_bucket}/env:/${terraform.workspace}",
+          "arn:aws:s3:::${var.s3_config_bucket}/env:/${terraform.workspace}/*",
+        ]
+      }
+    ]
+  })
 }
