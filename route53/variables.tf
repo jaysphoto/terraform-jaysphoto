@@ -1,3 +1,13 @@
+variable "main_domain_name" {
+  type = string
+  default = "jaysphoto.me"
+}
+
+variable "legacy_domain_name" {
+  type = string
+  default = "jayhaabee.nl"
+}
+
 variable "gmail_mx_records" {
   type = list(string)
   default = [

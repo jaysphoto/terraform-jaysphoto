@@ -1,22 +1,16 @@
-resource "aws_route53_zone" "legacy" {
-  name    = "jayhaabee.nl"
-}
+module "legacy" {
+  source  = "terraform-aws-modules/route53/aws"
 
-module "legacy-records" {
-  source  = "terraform-aws-modules/route53/aws//modules/records"
-  version = "~> 2.0"
-
-  zone_id = "Z7ESQH1GGCJR7"
-
-  records = [
-    {
-      name = ""
+  name = "${var.legacy_domain_name}"
+  records = {
+    gmail_mx ={
+      full_name = "${var.legacy_domain_name}"
       ttl  = 300
       type = "MX"
       records = var.gmail_mx_records
     },
-    {
-      name = ""
+    gmail_spf = {
+      full_name = "${var.legacy_domain_name}"
       ttl  = 300
       type = "TXT"
       records = [
@@ -24,25 +18,12 @@ module "legacy-records" {
         "v=spf1 include:_spf.google.com ~all"
       ]
     },
-    {
-      name  = "localhost",
+    localhost = {
       ttl   = 86400
       type  = "A"
       records = ["127.0.0.1"]
-    },
-    {
-      name  = "plex",
-      ttl   = 86400
-      type  = "A"
-      records = ["54.76.154.28"]
-    },
-    {
-      name  = "media",
-      ttl   = 86400
-      type  = "A"
-      records = ["54.76.154.28"]
     }
-  ]
+  }
 }
 
 /*

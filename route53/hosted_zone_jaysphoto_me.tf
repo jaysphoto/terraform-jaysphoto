@@ -1,22 +1,16 @@
-resource "aws_route53_zone" "main" {
-  name    = "jaysphoto.me"
-}
+module "main" {
+  source  = "terraform-aws-modules/route53/aws"
 
-module "records" {
-  source  = "terraform-aws-modules/route53/aws//modules/records"
-  version = "~> 2.0"
-
-  zone_id = "Z7HSDEOJF8RTN"
-
-  records = [
-    {
-      name = ""
+  name    = "${var.main_domain_name}"
+  records = {
+    "gmail_mx" ={
+      full_name = "${var.main_domain_name}"
       ttl  = 300
       type = "MX"
       records = var.gmail_mx_records
     },
-    {
-      name = ""
+    "gmail_spf" = {
+      full_name = "${var.main_domain_name}"
       ttl  = 86400
       type = "TXT"
       records = [
@@ -24,21 +18,19 @@ module "records" {
         "v=spf1 a include:_spf.google.com ~all"
       ]
     },
-    {
-      name = "google._domainkey"
+    "google._domainkey" = {
       ttl  = 300
       type = "TXT"
       records = [
         "google-site-verification=mMHPKq6hhqUlb2I0odZRNKyhkBr1PJvLmTeh3WImWoA"
       ]
     },
-    {
-      name  = "localhost",
+    "localhost" = {
       ttl   = 86400
       type  = "A"
       records = ["127.0.0.1"]
     }
-  ]
+  }
 }
 
 /*
