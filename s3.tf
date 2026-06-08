@@ -33,6 +33,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bootstrap_s3_buck
       sse_algorithm = "aws:kms"
     }
     bucket_key_enabled = true
+    blocked_encryption_types = ["SSE-C"]
   }
 }
 
