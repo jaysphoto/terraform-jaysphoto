@@ -56,10 +56,12 @@ locals {
         )
     ]) : "${ou_account_policy.project_name}_${ou_account_policy.type}_${ou_account_policy.policy_name}" => ou_account_policy
   }
+
+  ou_create_admin_account_policy = length(var.organizational_unit.admin_role_name) > 0 && length(var.ou_accounts) > 0
 }
 
 # Define default OU Account policy
-data "aws_iam_policy_document" "default_ou_policy" {
+data "aws_iam_policy_document" "default_ou_policy_deny_admin" {
   statement {
     sid         = "DenyIamAccessAdminRole"
     effect      = "Deny"
@@ -76,10 +78,12 @@ data "aws_iam_policy_document" "default_ou_policy" {
                     "iam:UpdateRoleDescription"
                   ]
      resources  = [
-                    length(var.organizational_unit.admin_role_name) > 1 ? "arn:aws:iam::*:role/${var.organizational_unit.admin_role_name}" : ""
+                    "arn:aws:iam::*:role/${var.organizational_unit.admin_role_name}"
                   ]
   }
+}
 
+data "aws_iam_policy_document" "default_ou_policy_deny_org_changes" {
   statement {
     sid         = "DenyAwsOrganizationChanges"
     effect      = "Deny"
@@ -92,12 +96,18 @@ data "aws_iam_policy_document" "default_ou_policy" {
   }
 }
 
+data "aws_iam_policy_document" "default_ou_policy" {
+  source_policy_documents = flatten([
+    data.aws_iam_policy_document.default_ou_policy_deny_org_changes.json,
+    length(var.organizational_unit.admin_role_name) > 0 ? [ data.aws_iam_policy_document.default_ou_policy_deny_admin.json ] : []
+  ])
+}
+
 resource "aws_organizations_policy" "default_ou_policy" {
   name    = local.default_ou_scp_name
   content = data.aws_iam_policy_document.default_ou_policy.json
   type    = "SERVICE_CONTROL_POLICY"
 }
-
 
 # Attach policies to AWS Organizational Unit (OU)
 resource "aws_organizations_policy_attachment" "organizational_unit_rcp" {
@@ -127,7 +137,7 @@ resource "aws_organizations_policy_attachment" "ou_control_policy" {
 
 # Create policy document for Assuming Admin access from root organization
 data "aws_iam_policy_document" "grant_organization_admin_access" {
-  count = length(var.organizational_unit.admin_role_name) > 0 ? 1 : 0
+  count = local.ou_create_admin_account_policy ? 1 : 0
 
   statement {
     actions = ["sts:AssumeRole"]
@@ -144,9 +154,17 @@ data "aws_iam_policy_document" "grant_organization_admin_access" {
 
 # Attach the policy document to an IAM policy 
 resource "aws_iam_policy" "projects_sandbox_admin_access_role_access_policy" {
-  count = length(var.organizational_unit.admin_role_name) > 0 ? 1 : 0
+  count = local.ou_create_admin_account_policy ? 1 : 0
 
   name    = "GrantAccessToOrganizationAccountAccessRole"
   path    = "/"
   policy  = data.aws_iam_policy_document.grant_organization_admin_access[0].json
+}
+
+# Attach the policy to the group defined in the organizational unit configuration
+resource "aws_iam_group_policy_attachment" "grant_organization_admin_access" {
+  for_each   = local.ou_create_admin_account_policy && length(var.organizational_unit.admin_role_group_attach) > 0 ? toset(var.organizational_unit.admin_role_group_attach) : []
+
+  group      = each.value
+  policy_arn = aws_iam_policy.projects_sandbox_admin_access_role_access_policy[0].arn
 }

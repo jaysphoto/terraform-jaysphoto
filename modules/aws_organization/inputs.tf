@@ -3,6 +3,7 @@ variable "organizational_unit" {
   type        = object({
                   name                          = string
                   admin_role_name               = optional(string, "")
+                  admin_role_group_attach       = optional(set(string), [])
                   service_control_policy_name   = string
                   resource_control_policy_name  = string
                 })

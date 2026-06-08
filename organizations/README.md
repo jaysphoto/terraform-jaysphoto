@@ -13,6 +13,7 @@ Organizational Unit and Account structure are read from a Json file, for example
     "organization_unit": {
         "name": "Project Sandbox",
         "admin_role_name": "OrganizationAccountAccessRole",
+        "admin_role_group_attach": ["AwsOrgAdmin"],
         "service_control_policy_name": "FullAWSAccess",
         "resource_control_policy_name": "RCPFullAWSAccess"
     },
