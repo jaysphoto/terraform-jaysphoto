@@ -14,15 +14,15 @@ module "main" {
       ttl  = 86400
       type = "TXT"
       records = [
-        "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3PPtQJbwjYDhfV4M2r8ZBYYp6wF0FqeBE8bNQV2NnamnsppTWO/MD90OxAr9kgwvtflB5POQzR40UyCnFpK2X7Se9hPOdmEhfmHTCT3h7uwywuH2y/Ho05brcw7AnAMiimcV9MuIth201NH0Q++jQIsD57iA/VAI+dGIjOqAyzQIDAQAB",
         "v=spf1 a include:_spf.google.com ~all"
       ]
     },
-    "google._domainkey" = {
+    "gmail_dkim" = {
+      full_name = "google._domainkey"
       ttl  = 300
       type = "TXT"
       records = [
-        "google-site-verification=mMHPKq6hhqUlb2I0odZRNKyhkBr1PJvLmTeh3WImWoA"
+        "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3PPtQJbwjYDhfV4M2r8ZBYYp6wF0FqeBE8bNQV2NnamnsppTWO/MD90OxAr9kgwvtflB5POQzR40UyCnFpK2X7Se9hPOdmEhfmHTCT3h7uwywuH2y/Ho05brcw7AnAMiimcV9MuIth201NH0Q++jQIsD57iA/VAI+dGIjOqAyzQIDAQAB",
       ]
     },
     "localhost" = {

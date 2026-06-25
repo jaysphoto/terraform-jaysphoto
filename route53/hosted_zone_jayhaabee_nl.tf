@@ -1,24 +1,31 @@
 module "legacy" {
   source  = "terraform-aws-modules/route53/aws"
 
-  name = "${var.legacy_domain_name}"
+  name    = "${var.legacy_domain_name}"
   records = {
-    gmail_mx ={
+    "gmail_mx" ={
       full_name = "${var.legacy_domain_name}"
       ttl  = 300
       type = "MX"
       records = var.gmail_mx_records
     },
-    gmail_spf = {
+    "gmail_spf" = {
       full_name = "${var.legacy_domain_name}"
       ttl  = 300
       type = "TXT"
       records = [
-        "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3PPtQJbwjYDhfV4M2r8ZBYYp6wF0FqeBE8bNQV2NnamnsppTWO/MD90OxAr9kgwvtflB5POQzR40UyCnFpK2X7Se9hPOdmEhfmHTCT3h7uwywuH2y/Ho05brcw7AnAMiimcV9MuIth201NH0Q++jQIsD57iA/VAI+dGIjOqAyzQIDAQAB",
         "v=spf1 include:_spf.google.com ~all"
       ]
     },
-    localhost = {
+    "gmail_dkim" = {
+      full_name = "google._domainkey"
+      ttl  = 300
+      type = "TXT"
+      records = [
+        "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDUST2y+cd9wzGYW9OHfdNjIBdHqMjCRWnMch1yTOVzB/v9RWvBtirYerBTNfh0eL13fk9l07PHvm3FTVlvpx1RbXhbZbaE4jkACkiASZW/KiBiXTXefGpjS1vFsfK0gHvCTOi6E7VM22wFWJn2lp5SnKwMr8y7d9rhvjjr38SRTwIDAQAB"
+      ]
+    },
+    "localhost" = {
       ttl   = 86400
       type  = "A"
       records = ["127.0.0.1"]
